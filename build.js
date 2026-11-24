@@ -7,9 +7,17 @@ const root = __dirname;
 const output = [];
 const categories = ['science', 'gaming'];
 
+function shortHash(value) {
+  let hash = 2166136261;
+  for (const char of String(value)) {
+    hash ^= char.codePointAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
 for (const category of categories) {
   const dir = path.join(root, 'articles', category);
-
   if (!fs.existsSync(dir)) continue;
 
   const files = fs.readdirSync(dir)
@@ -25,7 +33,7 @@ for (const category of categories) {
     );
 
     if (!match) {
-      console.warn(`Skipping ${file}: missing YAML frontmatter`);
+      console.warn(`Skipping ${category}/${file}: missing YAML frontmatter`);
       continue;
     }
 
@@ -34,26 +42,34 @@ for (const category of categories) {
     try {
       metadata = YAML.parse(match[1]) || {};
     } catch (error) {
-      console.warn(`Skipping ${file}: ${error.message}`);
+      console.warn(`Skipping ${category}/${file}: invalid YAML (${error.message})`);
       continue;
     }
 
-    const slug = file
+    const base = file
       .replace(/\.md$/i, '')
       .replace(/^\d{4}-\d{2}-\d{2}-/, '');
 
-    const body = metadata.body ?? match[2] ?? '';
+    const title = String(metadata.title || base || 'Untitled article');
+
+    const date = metadata.date instanceof Date
+      ? metadata.date.toISOString().slice(0, 10)
+      : String(metadata.date || '');
+
+    const slug = base ||
+      `${category}-${date || 'undated'}-${shortHash(title)}`;
+
+    const excerpt = String(metadata.excerpt || '');
+    const body = metadata.body || match[2] || excerpt;
 
     output.push({
       slug,
       category,
-      title: String(metadata.title || slug),
-      date: metadata.date ? String(metadata.date) : '',
-      excerpt: String(metadata.excerpt || ''),
+      title,
+      date,
+      excerpt,
       cover: String(metadata.cover || ''),
-      body: typeof body === 'string'
-        ? body.trim()
-        : JSON.stringify(body)
+      body: String(body).trim()
     });
   }
 }
@@ -68,6 +84,4 @@ fs.writeFileSync(
   JSON.stringify(output, null, 2) + '\n'
 );
 
-console.log(
-  `Generated articles.json with ${output.length} article(s).`
-);
+console.log(`Generated articles.json with ${output.length} article(s).`);
