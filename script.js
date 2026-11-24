@@ -1,0 +1,1 @@
+document.getElementById('year')?.replaceChildren(String(new Date().getFullYear()));const menu=document.getElementById('menu');menu?.addEventListener('click',()=>document.getElementById('nav')?.classList.toggle('open'));
