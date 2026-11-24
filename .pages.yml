@@ -1,0 +1,59 @@
+
+media:
+  input: images/articles
+  output: /images/articles
+  categories: [image]
+  rename: true
+
+content:
+  - name: science
+    label: Science Articles
+    type: collection
+    path: articles/science
+    filename: "{year}-{month}-{day}-{title}.md"
+    format: yaml-frontmatter
+    fields:
+      - name: title
+        label: Article Title
+        type: string
+        required: true
+      - name: date
+        label: Published Date
+        type: date
+      - name: excerpt
+        label: Short Description
+        type: text
+      - name: cover
+        label: Cover Image
+        type: image
+      - name: body
+        label: Article Content
+        type: rich-text
+        options:
+          media: false
+
+  - name: gaming
+    label: Gaming Articles
+    type: collection
+    path: articles/gaming
+    filename: "{year}-{month}-{day}-{title}.md"
+    format: yaml-frontmatter
+    fields:
+      - name: title
+        label: Article Title
+        type: string
+        required: true
+      - name: date
+        label: Published Date
+        type: date
+      - name: excerpt
+        label: Short Description
+        type: text
+      - name: cover
+        label: Cover Image
+        type: image
+      - name: body
+        label: Article Content
+        type: rich-text
+        options:
+          media: false
